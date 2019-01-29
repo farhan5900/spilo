@@ -5,8 +5,8 @@ MAINTAINER Alexander Kukushkin <alexander.kukushkin@zalando.de>
 ARG PGSQL_USER=postgres
 ARG PGSQL_GROUP=postgres
 
-ENV PGSQL_USER $PGSQL_USER \
-    PGSQL_GROUP $PGSQL_GROUP
+ENV PGSQL_USER=$PGSQL_USER \
+    PGSQL_GROUP=$PGSQL_GROUP
 
 RUN groupadd -g 99 nobody \
     && usermod -u 99 -g 99 -c 'Nobody for RHEL based system' nobody \
