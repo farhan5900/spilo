@@ -5,9 +5,6 @@ MAINTAINER Alexander Kukushkin <alexander.kukushkin@zalando.de>
 ARG PGSQL_USER=postgres
 ARG PGSQL_GROUP=postgres
 
-ENV PGSQL_USER=$PGSQL_USER \
-    PGSQL_GROUP=$PGSQL_GROUP
-
 RUN groupadd -g 99 nobody \
     && usermod -u 99 -g 99 -c 'Nobody for RHEL based system' nobody \
     && echo "nobody:x:65534:65534:Nobody for Debian based system:/nonexistent:/sbin/nologin" >> /etc/passwd \
@@ -36,6 +33,7 @@ ADD envdir /usr/local/bin/
 RUN mkdir -p /var/log/supervisor \
         && ln -s supervisor/supervisord.conf /etc/supervisord.conf \
         && sed -i "s|/var/lib/postgresql.*|$PGHOME:/bin/bash|" /etc/passwd \
+        && mkdir -p $PGDATA $PGLOG
         && chown -R ${PGSQL_USER}:${PGSQL_GROUP} $PGHOME \
         && chmod -R g+w $PGHOME \
         && sed -i 's/set compatible/set nocompatible/' /etc/vim/vimrc.tiny \
