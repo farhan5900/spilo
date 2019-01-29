@@ -21,7 +21,7 @@ for i in $(seq 0 7); do
         touch "${PGLOG}/postgresql-$i.csv"
     fi
 done
-chown -R postgres:postgres "$PGROOT"
+chown -R $PGSQL_USER:$PGSQL_GROUP "$PGROOT"
 
 if [ "$DEMO" = "true" ]; then
     sed -i '/motd/d' /root/.bashrc
