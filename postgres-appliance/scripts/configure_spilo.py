@@ -193,6 +193,7 @@ postgresql:
   listen: 0.0.0.0:{{PGPORT}}
   connect_address: {{instance_data.ip}}:{{PGPORT}}
   data_dir: {{PGDATA}}
+  pgpass: /mnt/mesos/sandbox/.pgpass
   parameters:
     archive_command: {{{postgresql.parameters.archive_command}}}
     shared_buffers: {{postgresql.parameters.shared_buffers}}

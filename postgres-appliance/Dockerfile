@@ -30,18 +30,16 @@ ADD supervisor /etc/supervisor
 ADD pgq_ticker.ini $PGHOME/
 ADD envdir /usr/local/bin/
 
-RUN mkdir -p /var/log/supervisor \
+RUN mkdir -p /var/log/supervisor /var/run/supervisor \
         && ln -s supervisor/supervisord.conf /etc/supervisord.conf \
-        && sed -i "s|/var/lib/postgresql.*|$PGHOME:/bin/bash|" /etc/passwd \
-        && mkdir -p $PGDATA $PGLOG
-        && chown -R ${PGSQL_USER}:${PGSQL_GROUP} $PGHOME \
-        && chmod -R g+w $PGHOME \
+        && chown -R ${PGSQL_USER}:${PGSQL_GROUP} /var/log/supervisor /var/run/supervisor /var/run/postgresql /var/log/postgresql \
+        && chmod -R g+w /var/log/supervisor /var/run/supervisor /var/run/postgresql /var/log/postgresql \
         && sed -i 's/set compatible/set nocompatible/' /etc/vim/vimrc.tiny \
         && for e in TERM=linux LC_ALL=C.UTF-8 LANG=C.UTF-8 EDITOR=vi; \
             do echo "export $e" >> /etc/bash.bashrc; \
         done \
         && echo "export PAGER='pspg -bX --no-mouse'" >> /etc/bash.bashrc \
-        && echo "source /etc/motd" >> /root/.bashrc
+        && echo "source /etc/motd" >> /mnt/mesos/sandbox/.bashrc
 
 ADD scripts bootstrap /scripts/
 
