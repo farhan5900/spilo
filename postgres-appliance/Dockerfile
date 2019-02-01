@@ -17,29 +17,29 @@ ENV LC_ALL=en_US.utf-8 \
     PGHOME=/mnt/mesos/sandbox
 
 ENV WALE_ENV_DIR=$PGHOME/etc/wal-e.d/env \
-    PGROOT=$PGHOME/pgdata/pgroot \
+    PGROOT=$PGHOME/pgroot \
     LOG_ENV_DIR=$PGHOME/etc/log.d/env
 
-ENV PGDATA=$PGROOT/data \
+ENV PGDATA=$PGROOT/pgdata \
     PGLOG=$PGROOT/pg_log
 
 WORKDIR $PGHOME
 
-ADD motd /etc/
-ADD supervisor /etc/supervisor
-ADD pgq_ticker.ini $PGHOME/
+ADD pgq_ticker.ini /etc/
 ADD envdir /usr/local/bin/
 
-RUN mkdir -p /var/log/supervisor /var/run/supervisor \
-        && ln -s supervisor/supervisord.conf /etc/supervisord.conf \
-        && chown -R ${PGSQL_USER}:${PGSQL_GROUP} /var/log/supervisor /var/run/supervisor /var/run/postgresql /var/log/postgresql \
-        && chmod -R g+w /var/log/supervisor /var/run/supervisor /var/run/postgresql /var/log/postgresql \
-        && sed -i 's/set compatible/set nocompatible/' /etc/vim/vimrc.tiny \
-        && for e in TERM=linux LC_ALL=C.UTF-8 LANG=C.UTF-8 EDITOR=vi; \
-            do echo "export $e" >> /etc/bash.bashrc; \
-        done \
-        && echo "export PAGER='pspg -bX --no-mouse'" >> /etc/bash.bashrc \
-        && echo "source /etc/motd" >> /mnt/mesos/sandbox/.bashrc
+RUN if [ ${PGSQL_USER} = "nobody" ]; then \
+        chown -R ${PGSQL_USER}:${PGSQL_GROUP} /var/run/postgresql /var/log/postgresql /etc/pgq_ticker.ini \
+        && chmod -R g+w /var/run/postgresql /var/log/postgresql; \
+    fi \
+    && sed -i "s|/var/lib/postgresql.*|$PGHOME:/bin/bash|" /etc/passwd \
+    && sed -i 's/set compatible/set nocompatible/' /etc/vim/vimrc.tiny \
+    && for e in TERM=linux LC_ALL=C.UTF-8 LANG=C.UTF-8 EDITOR=vi; \
+        do echo "export $e" >> /etc/bash.bashrc; \
+    done \
+    && echo "export PAGER='pspg -bX --no-mouse'" >> /etc/bash.bashrc
+
+RUN env -i /usr/sbin/cron
 
 ADD scripts bootstrap /scripts/
 
