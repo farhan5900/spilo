@@ -55,13 +55,11 @@ function squash_new_image() {
             | grep "^$NEW_BUILD_ID " | grep -v "^$NEW_BUILD_ID $IMGNAME-build" \
             | awk '{print $2; exit 0}')
 
-
     # new "-build" image has the same id as already exiting one
     [[ ! -z $TAG_OF ]] && docker tag ${TAG_OF%-build}-squashed $IMGNAME-squashed && return 0
 
-
     [[ "$OLD_BUILD_ID" != "$NEW_BUILD_ID" || -z "$(docker images -q $IMGNAME-squashed)" ]] \
-            && run_or_fail docker-squash -t $IMGNAME-squashed -v $NEW_BUILD_ID
+            && run_or_fail docker-squash -t $IMGNAME-squashed $IMGNAME-build
 }
 
 run_or_fail docker build "${build_args[@]}" -f Dockerfile.build
