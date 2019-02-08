@@ -59,6 +59,4 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 
 ADD scripts bootstrap /scripts/
 
-ADD scm-source.json launch.sh /
-
 CMD []
