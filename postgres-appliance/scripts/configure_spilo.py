@@ -637,9 +637,15 @@ def write_clone_pgpass(placeholders, overwrite):
 
 
 def write_crontab(placeholders, overwrite):
+    import getpass
+    user = getpass.getuser()
     if not overwrite:
         with open(os.devnull, 'w') as devnull:
-            cron_exit = subprocess.call(['crontab', '-lu', 'postgres'], stdout=devnull, stderr=devnull)
+            cron_exit = 0
+            if user == 'root':
+              cron_exit = subprocess.call(['crontab', '-lu', 'postgres'], stdout=devnull, stderr=devnull)
+            else:
+              cron_exit = subprocess.call(['crontab', '-l'], stdout=devnull, stderr=devnull)
             if cron_exit == 0:
                 return logging.warning('Cron is already configured. (Use option --force to overwrite cron)')
 
@@ -656,7 +662,11 @@ def write_crontab(placeholders, overwrite):
     lines += yaml.load(placeholders['CRONTAB'])
     lines += ['']  # EOF requires empty line for cron
 
-    c = subprocess.Popen(['crontab', '-u', 'postgres', '-'], stdin=subprocess.PIPE)
+    c = ''
+    if user == 'root':
+      c = subprocess.Popen(['crontab', '-u', 'postgres', '-'], stdin=subprocess.PIPE)
+    else:
+      c = subprocess.Popen(['crontab', '-'], stdin=subprocess.PIPE)
     c.communicate(input='\n'.join(lines).encode())
 
 
