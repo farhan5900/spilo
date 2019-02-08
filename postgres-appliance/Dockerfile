@@ -6,9 +6,10 @@ ARG PGSQL_USER=postgres
 ARG PGSQL_GROUP=postgres
 
 RUN groupadd -g 99 nobody \
-    && usermod -u 99 -g 99 -c 'Nobody for RHEL based system' nobody \
-    && echo "nobody:x:65534:65534:Nobody for Debian based system:/nonexistent:/sbin/nologin" >> /etc/passwd \
-    && usermod -a -G users nobody
+    && usermod -u 99 -g 99 -c 'Nobody for RHEL based system' -d /mnt/mesos/sandbox nobody \
+    && echo "nobody:x:65534:65534:Nobody for Debian based system:/mnt/mesos/sandbox:/sbin/nologin" >> /etc/passwd \
+    && usermod -a -G users nobody \
+    && usermod -a -G crontab nobody
 
 EXPOSE 5432 8008 8080
 
@@ -39,10 +40,25 @@ RUN if [ ${PGSQL_USER} = "nobody" ]; then \
     done \
     && echo "export PAGER='pspg -bX --no-mouse'" >> /etc/bash.bashrc
 
-RUN env -i /usr/sbin/cron
+RUN export DEBIAN_FRONTEND=noninteractive \
+    && apt-get update \
+    && apt-get install -y python3-pip \
+    && pip3 install croniter \
+    && apt-get purge -y python3-pip \
+    && apt-get autoremove -y \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+            /var/cache/debconf/* \
+            /root/.cache \
+            /usr/share/doc \
+            /usr/share/man \
+            /usr/share/locale/?? \
+            /usr/share/locale/??_?? \
+            /usr/share/info \
+    && find /var/log -type f -exec truncate --size 0 {} \;
 
 ADD scripts bootstrap /scripts/
 
 ADD scm-source.json launch.sh /
 
-CMD ["/bin/sh", "/launch.sh"]
+CMD []
