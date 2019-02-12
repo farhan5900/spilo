@@ -226,7 +226,12 @@ postgresql:
     {{#PAM_OAUTH2}}
     - hostssl all             +{{HUMAN_ROLE}}    all                pam
     {{/PAM_OAUTH2}}
+    {{#USE_LDAP}}
+    - hostssl all             all                all                ldap ldapserver={{LDAP_SERVER}} ldapport={{LDAP_PORT}} ldapbasedn="{{LDAP_BASE_DN}}" ldapsearchattribute=uid ldapbinddn="{{LDAP_BIND_DN}}" ldapbindpasswd="{{LDAP_BIND_PASSWD}}"
+    {{/USE_LDAP}}
+    {{^USE_LDAP}}
     - hostssl all             all                all                md5
+    {{/USE_LDAP}}    
 
   {{#USE_WALE}}
   recovery_conf:
@@ -396,6 +401,13 @@ def get_placeholders(provider):
     placeholders.setdefault('LOG_S3_BUCKET', '')
     placeholders.setdefault('LOG_TMPDIR', os.path.abspath(os.path.join(placeholders['PGROOT'], '../tmp')))
     placeholders.setdefault('LOG_BUCKET_SCOPE_SUFFIX', '')
+
+    placeholders.setdefault('USE_LDAP', False)
+    placeholders.setdefault('LDAP_SERVER', 'localhost')
+    placeholders.setdefault('LDAP_PORT', 389)
+    placeholders.setdefault('LDAP_BASE_DN', 'dc=example,dc=org')
+    placeholders.setdefault('LDAP_BIND_DN', 'cn=admin,dc=example,dc=org')
+    placeholders.setdefault('LDAP_BIND_PASSWD', 'password')
 
     # see comment for wal-e bucket prefix
     placeholders.setdefault('LOG_BUCKET_SCOPE_PREFIX', '{0}-'.format(placeholders['NAMESPACE'])
